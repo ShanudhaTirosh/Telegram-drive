@@ -1,16 +1,449 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Telegram Drive</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Drive - Unlimited Cloud Storage via Telegram</title>
+    <meta name="description" content="Secure, open-source, cross-platform desktop application that turns your Telegram account into unlimited cloud storage. Built with Tauri, Rust, and React.">
+    <meta name="keywords" content="Telegram Drive, Cloud Storage, Telegram API, Tauri, Rust, Open Source, File Manager, Shanu FX">
+    <meta name="author" content="Shanu FX">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://shanu-fx.web.app/">
+    <meta property="og:title" content="Telegram Drive - Unlimited Cloud Storage via Telegram">
+    <meta property="og:description" content="Turn your Telegram account into an unlimited, secure cloud storage drive with a familiar file explorer interface.">
+    <meta property="og:image" content="https://shanu-fx.web.app/og-image.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://shanu-fx.web.app/">
+    <meta property="twitter:title" content="Telegram Drive - Unlimited Cloud Storage via Telegram">
+    <meta property="twitter:description" content="Turn your Telegram account into an unlimited, secure cloud storage drive with a familiar file explorer interface.">
+    <meta property="twitter:image" content="https://shanu-fx.web.app/og-image.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --primary: #0088cc;
+            --secondary: #6366f1;
+            --accent: #a855f7;
+            --background: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 20% 20%, rgba(0, 136, 204, 0.15), transparent 40%),
+                        radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.15), transparent 40%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Header */
+        header {
+            padding: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 99px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 8rem 0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+            background: linear-gradient(to bottom, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-dim);
+            max-width: 700px;
+            margin-bottom: 3rem;
+        }
+
+        .hero-image-container {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 4rem;
+            padding: 1rem;
+            background: var(--glass);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-image {
+            width: 100%;
+            border-radius: 16px;
+            display: block;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 10rem 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .section-title h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            padding: 3rem 2rem;
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            transition: transform 0.3s, border-color 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+        }
+
+        .feature-icon {
+            width: 3rem;
+            height: 3rem;
+            background: rgba(0, 136, 204, 0.1);
+            color: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: var(--text-dim);
+        }
+
+        /* Tech Stack Section */
+        .tech-stack {
+            padding: 5rem 0;
+            text-align: center;
+        }
+
+        .tech-icons {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            flex-wrap: wrap;
+            margin-top: 3rem;
+            opacity: 0.7;
+        }
+
+        .tech-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Footer */
+        footer {
+            padding: 5rem 0;
+            border-top: 1px solid var(--glass-border);
+            text-align: center;
+            color: var(--text-dim);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .footer-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--text);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
 </head>
-
 <body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
-</body>
+    <div class="bg-glow"></div>
 
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i data-lucide="send"></i>
+                Telegram Drive
+            </div>
+            <nav class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#gallery">Gallery</a>
+                <a href="#tech">Tech</a>
+                <a href="https://github.com/ShanudhaTirosh/Telegram-drive">GitHub</a>
+            </nav>
+            <a href="https://shanu-fx.web.app/" class="btn-primary">
+                Main Website <i data-lucide="external-link"></i>
+            </a>
+        </header>
+
+        <section class="hero">
+            <h1>Unlimited Storage.<br>Right in Telegram.</h1>
+            <p>Turn your Telegram account into an unlimited, secure cloud storage drive. Organize, stream, and manage your files with a familiar interface.</p>
+            <div class="hero-btns">
+                <a href="https://github.com/ShanudhaTirosh/Telegram-drive" class="btn-primary">
+                    Get Started <i data-lucide="github"></i>
+                </a>
+            </div>
+            <div class="hero-image-container">
+                <img src="public/hero.png" alt="Telegram Drive Interface" class="hero-image">
+            </div>
+        </section>
+
+        <section id="features" class="features">
+            <div class="section-title">
+                <h2>Key Features</h2>
+                <p>Everything you need for your personal cloud storage.</p>
+            </div>
+            <div class="grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i data-lucide="database"></i></div>
+                    <h3>Unlimited Storage</h3>
+                    <p>Leverage Telegram's infrastructure for endless file storage without any costs.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i data-lucide="zap"></i></div>
+                    <h3>High Performance</h3>
+                    <p>Virtual scrolling handles folders with thousands of files instantly and smoothly.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i data-lucide="play"></i></div>
+                    <h3>Media Streaming</h3>
+                    <p>Stream video and audio files directly from the cloud without waiting for downloads.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i data-lucide="file-text"></i></div>
+                    <h3>PDF Viewer</h3>
+                    <p>Built-in PDF support with infinite scrolling for a seamless reading experience.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i data-lucide="mouse-pointer"></i></div>
+                    <h3>Drag & Drop</h3>
+                    <p>Intuitive file management with drag-and-drop support for uploads and organization.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i data-lucide="shield"></i></div>
+                    <h3>Privacy Focused</h3>
+                    <p>Your API keys and data stay local. No third-party servers involved in your data.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="gallery" class="features" style="padding-top: 0;">
+            <div class="section-title">
+                <h2>Interface Preview</h2>
+                <p>A glimpse into the clean and modern user interface.</p>
+            </div>
+            <div class="grid">
+                <div class="feature-card" style="padding: 1rem;">
+                    <img src="screnshots/DarkModeGrid.png" alt="Dark Mode Grid" style="width:100%; border-radius: 12px;">
+                    <p style="margin-top: 1rem; text-align: center;">Vibrant Grid View</p>
+                </div>
+                <div class="feature-card" style="padding: 1rem;">
+                    <img src="screnshots/VideoPlayback.png" alt="Video Playback" style="width:100%; border-radius: 12px;">
+                    <p style="margin-top: 1rem; text-align: center;">Seamless Video Streaming</p>
+                </div>
+                <div class="feature-card" style="padding: 1rem;">
+                    <img src="screnshots/ImagePreview.png" alt="Image Preview" style="width:100%; border-radius: 12px;">
+                    <p style="margin-top: 1rem; text-align: center;">Built-in Image Preview</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="tech" class="tech-stack">
+            <div class="section-title">
+                <h2>Built with Modern Tech</h2>
+            </div>
+            <div class="tech-icons">
+                <div class="tech-item">
+                    <i data-lucide="box"></i>
+                    <span>Tauri</span>
+                </div>
+                <div class="tech-item">
+                    <i data-lucide="cpu"></i>
+                    <span>Rust</span>
+                </div>
+                <div class="tech-item">
+                    <i data-lucide="code-2"></i>
+                    <span>React</span>
+                </div>
+                <div class="tech-item">
+                    <i data-lucide="layers"></i>
+                    <span>TypeScript</span>
+                </div>
+                <div class="tech-item">
+                    <i data-lucide="wind"></i>
+                    <span>Vite</span>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="logo" style="justify-content: center; margin-bottom: 2rem;">
+                <i data-lucide="send"></i>
+                Telegram Drive
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/ShanudhaTirosh/Telegram-drive">GitHub Repo</a>
+                <a href="https://shanu-fx.web.app/">Main Website</a>
+                <a href="https://github.com/ShanudhaTirosh">Developer</a>
+            </div>
+            <p>&copy; 2026 Shanu FX. All rights reserved.</p>
+            <p style="margin-top: 1rem; font-size: 0.8rem; opacity: 0.5;">
+                Disclaimer: This application is not affiliated with Telegram FZ-LLC.
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
 </html>
