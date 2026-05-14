@@ -1,16 +1,29 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/logo.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Telegram Drive</title>
+  <title>Telegram Drive — ShanuFx</title>
+  <!-- Inter font for modern typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* Critical path: prevent FOUC on Tauri window open */
+    html { background: #080d14; }
+    body { margin:0; opacity:0; transition:opacity 0.15s ease; }
+    body.ready { opacity:1; }
+  </style>
 </head>
-
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
+  <script>
+    // Fade in after React hydrates to prevent flash
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => document.body.classList.add('ready'), 50);
+    });
+  </script>
 </body>
-
 </html>

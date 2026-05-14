@@ -2,10 +2,11 @@ export interface TelegramFile {
     id: number;
     name: string;
     size: number;
-    sizeStr: string; // Formatted size
+    sizeStr: string;
     created_at?: string;
-    type?: 'folder' | 'file'; // implied icon_type
-    // Add other fields if backend sends them
+    type?: 'folder' | 'file';
+    isChunked?: boolean;        // true when this is the logical merged view of a chunked file
+    chunkCount?: number;        // number of parts for chunked files
 }
 
 export interface TelegramFolder {
@@ -20,10 +21,11 @@ export interface QueueItem {
     folderId: number | null;
     status: 'pending' | 'uploading' | 'success' | 'error' | 'cancelled';
     error?: string;
-    progress?: number; // 0-100
+    progress?: number;
     uploadedBytes?: number;
     totalBytes?: number;
     speedBytesPerSec?: number;
+    chunkLabel?: string;        // e.g. "Part 2 of 3" or "Merging parts…"
 }
 
 export interface BandwidthStats {
@@ -38,9 +40,9 @@ export interface DownloadItem {
     folderId: number | null;
     status: 'pending' | 'downloading' | 'success' | 'error' | 'cancelled';
     error?: string;
-    progress?: number; // 0-100
+    progress?: number;
     uploadedBytes?: number;
     totalBytes?: number;
     speedBytesPerSec?: number;
+    chunkLabel?: string;        // e.g. "Downloading part 1 of 3" or "Merging parts…"
 }
-

@@ -7,6 +7,18 @@ import { toast } from 'sonner';
 import { QueueItem } from '../types';
 import { useFileDrop } from './useFileDrop';
 import type { Store } from '@tauri-apps/plugin-store';
+import {
+    CHUNK_SIZE_BYTES,
+    shouldChunk,
+    splitFile,
+    buildChunkName,
+    buildManifestName,
+    buildManifestJson,
+    writeTempTextFile,
+    deleteTempFiles,
+    ChunkManifest,
+    ChunkEntry,
+} from './useChunkedTransfer';
 
 interface ProgressPayload {
     id: string;
@@ -23,7 +35,6 @@ export function useFileUpload(activeFolderId: number | null, store: Store | null
     const [initialized, setInitialized] = useState(false);
     const cancelledRef = useRef<Set<string>>(new Set());
 
-    // Listen for progress events from Rust
     useEffect(() => {
         let unlisten: UnlistenFn | undefined;
         listen<ProgressPayload>('upload-progress', (event) => {
@@ -63,22 +74,18 @@ export function useFileUpload(activeFolderId: number | null, store: Store | null
     useEffect(() => {
         if (processing) return;
         const nextItem = uploadQueue.find(i => i.status === 'pending');
-        if (nextItem) {
-            processItem(nextItem);
-        }
+        if (nextItem) { processItem(nextItem); }
     }, [uploadQueue, processing]);
 
     const processItem = async (item: QueueItem) => {
         setProcessing(true);
         setUploadQueue(q => q.map(i => i.id === item.id ? { ...i, status: 'uploading', progress: 0 } : i));
         try {
-            await invoke('cmd_upload_file', { path: item.path, folderId: item.folderId, transferId: item.id });
-            // Check if cancelled during upload
-            if (cancelledRef.current.has(item.id)) {
-                cancelledRef.current.delete(item.id);
+            const { needsChunk, size } = await shouldChunk(item.path);
+            if (needsChunk) {
+                await processChunkedUpload(item, size);
             } else {
-                setUploadQueue(q => q.map(i => i.id === item.id ? { ...i, status: 'success', progress: 100 } : i));
-                queryClient.invalidateQueries({ queryKey: ['files', item.folderId] });
+                await processDirectUpload(item);
             }
         } catch (e) {
             if (!cancelledRef.current.has(item.id)) {
@@ -97,6 +104,104 @@ export function useFileUpload(activeFolderId: number | null, store: Store | null
         }
     };
 
+    const processDirectUpload = async (item: QueueItem) => {
+        await invoke('cmd_upload_file', { path: item.path, folderId: item.folderId, transferId: item.id });
+        if (cancelledRef.current.has(item.id)) {
+            cancelledRef.current.delete(item.id);
+        } else {
+            setUploadQueue(q => q.map(i => i.id === item.id ? { ...i, status: 'success', progress: 100 } : i));
+            queryClient.invalidateQueries({ queryKey: ['files', item.folderId] });
+        }
+    };
+
+    const processChunkedUpload = async (item: QueueItem, originalSize: number) => {
+        const originalName = item.path.split(/[/\\]/).pop() ?? item.path;
+        const totalChunks = Math.ceil(originalSize / CHUNK_SIZE_BYTES);
+
+        toast.info(
+            `"${originalName}" is ${(originalSize / 1e9).toFixed(1)} GB — splitting into ${totalChunks} parts automatically…`,
+            { duration: 6000 }
+        );
+
+        setUploadQueue(q => q.map(i =>
+            i.id === item.id ? { ...i, status: 'uploading', progress: 0, totalBytes: originalSize, uploadedBytes: 0 } : i
+        ));
+
+        let chunkPaths: string[] = [];
+        try {
+            chunkPaths = await splitFile(item.path, CHUNK_SIZE_BYTES);
+        } catch (splitErr) {
+            throw new Error(`Failed to split file: ${splitErr}`);
+        }
+
+        const uploadedChunks: ChunkEntry[] = [];
+
+        for (let i = 0; i < chunkPaths.length; i++) {
+            if (cancelledRef.current.has(item.id)) {
+                await deleteTempFiles(chunkPaths).catch(() => {});
+                cancelledRef.current.delete(item.id);
+                setUploadQueue(q => q.map(qi => qi.id === item.id ? { ...qi, status: 'cancelled' } : qi));
+                return;
+            }
+
+            const chunkPath = chunkPaths[i];
+            const chunkName = buildChunkName(originalName, i + 1, chunkPaths.length);
+            const chunkTransferId = `${item.id}_chunk${i + 1}`;
+
+            setUploadQueue(q => q.map(qi =>
+                qi.id === item.id ? { ...qi, chunkLabel: `Part ${i + 1} of ${chunkPaths.length}` } : qi
+            ));
+
+            const messageId = await invoke<number>('cmd_upload_file', {
+                path: chunkPath,
+                folderId: item.folderId,
+                transferId: chunkTransferId,
+                customName: chunkName,
+            });
+
+            const chunkSize = await invoke<number>('cmd_get_file_size', { path: chunkPath }).catch(() => 0);
+            uploadedChunks.push({ name: chunkName, message_id: messageId ?? 0, size: chunkSize });
+
+            const overallProgress = Math.round(((i + 1) / chunkPaths.length) * 90);
+            setUploadQueue(q => q.map(qi => qi.id === item.id ? { ...qi, progress: overallProgress } : qi));
+        }
+
+        const manifest: ChunkManifest = {
+            version: 1,
+            original_name: originalName,
+            original_size: originalSize,
+            chunk_count: chunkPaths.length,
+            chunk_size: CHUNK_SIZE_BYTES,
+            chunks: uploadedChunks,
+            created_at: new Date().toISOString(),
+        };
+
+        const manifestJson = buildManifestJson(manifest);
+        const manifestName = buildManifestName(originalName);
+        let manifestTmpPath: string;
+
+        try {
+            manifestTmpPath = await writeTempTextFile(manifestJson);
+        } catch (e) {
+            throw new Error(`Failed to write manifest: ${e}`);
+        }
+
+        await invoke('cmd_upload_file', {
+            path: manifestTmpPath,
+            folderId: item.folderId,
+            transferId: `${item.id}_manifest`,
+            customName: manifestName,
+        });
+
+        await deleteTempFiles([...chunkPaths, manifestTmpPath]).catch(() => {});
+
+        setUploadQueue(q => q.map(i =>
+            i.id === item.id ? { ...i, status: 'success', progress: 100, chunkLabel: undefined } : i
+        ));
+        queryClient.invalidateQueries({ queryKey: ['files', item.folderId] });
+        toast.success(`"${originalName}" uploaded in ${chunkPaths.length} parts. Auto-merge on download is active.`);
+    };
+
     const handleManualUpload = async () => {
         try {
             const selected = await open({ multiple: true, directory: false });
@@ -106,13 +211,13 @@ export function useFileUpload(activeFolderId: number | null, store: Store | null
                     id: Math.random().toString(36).substr(2, 9),
                     path,
                     folderId: activeFolderId,
-                    status: 'pending'
+                    status: 'pending',
                 }));
                 setUploadQueue(prev => [...prev, ...newItems]);
-                toast.info(`Queued ${paths.length} files for upload`);
+                toast.info(`Queued ${paths.length} file(s) for upload`);
             }
         } catch {
-            toast.error("Failed to open file dialog");
+            toast.error('Failed to open file dialog');
         }
     };
 
@@ -138,7 +243,6 @@ export function useFileUpload(activeFolderId: number | null, store: Store | null
                 invoke('cmd_cancel_transfer', { transferId: id }).catch(() => {});
                 return q.map(i => i.id === id ? { ...i, status: 'cancelled' as const } : i);
             }
-            // Remove pending items directly
             if (item?.status === 'pending') {
                 return q.filter(i => i.id !== id);
             }
@@ -149,20 +253,12 @@ export function useFileUpload(activeFolderId: number | null, store: Store | null
     const retryItem = (id: string) => {
         setUploadQueue(q => q.map(i =>
             i.id === id && (i.status === 'error' || i.status === 'cancelled')
-                ? { ...i, status: 'pending' as const, error: undefined, progress: undefined, uploadedBytes: undefined, totalBytes: undefined, speedBytesPerSec: undefined }
+                ? { ...i, status: 'pending' as const, error: undefined, progress: undefined, uploadedBytes: undefined, totalBytes: undefined, speedBytesPerSec: undefined, chunkLabel: undefined }
                 : i
         ));
     };
 
     const { isDragging } = useFileDrop();
 
-    return {
-        uploadQueue,
-        setUploadQueue,
-        handleManualUpload,
-        cancelAll,
-        cancelItem,
-        retryItem,
-        isDragging
-    };
+    return { uploadQueue, setUploadQueue, handleManualUpload, cancelAll, cancelItem, retryItem, isDragging };
 }

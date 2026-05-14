@@ -74,16 +74,29 @@ function AppContent() {
   // Styled splash screen while verifying the session
   if (authStatus === "loading") {
     return (
-      <main className="h-screen w-screen flex items-center justify-center bg-telegram-bg">
-        <div className="flex flex-col items-center gap-4 animate-pulse">
-          <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/60">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
+      <main style={{ height:'100vh', width:'100vw', display:'flex', alignItems:'center', justifyContent:'center', background:'#080d14' }}>
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'1.25rem' }}>
+          <div style={{
+            width:64, height:64, borderRadius:20, display:'flex', alignItems:'center', justifyContent:'center',
+            background:'linear-gradient(135deg,rgba(59,158,255,0.2),rgba(124,58,237,0.15))',
+            border:'1px solid rgba(59,158,255,0.25)',
+            boxShadow:'0 0 32px rgba(59,158,255,0.2)',
+            animation:'pulse 2s infinite',
+          }}>
+            <img src="/logo.svg" style={{ width:36, height:36 }} alt="Logo" />
           </div>
-          <p className="text-sm text-telegram-subtext tracking-wide">Restoring session...</p>
+          <div style={{ textAlign:'center' }}>
+            <div style={{ fontSize:16, fontWeight:700, color:'#e8f0fe', letterSpacing:'-0.02em' }}>Telegram Drive</div>
+            <div style={{ fontSize:12, color:'#6b85a3', marginTop:4, letterSpacing:'0.04em' }}>Restoring session…</div>
+          </div>
+          <div style={{ width:180, height:2, borderRadius:99, background:'rgba(59,158,255,0.1)', overflow:'hidden' }}>
+            <div style={{
+              height:'100%', width:'40%', borderRadius:99,
+              background:'linear-gradient(90deg,#3b9eff,#00d4ff)',
+              animation:'progress-indeterminate 1.5s infinite linear',
+              boxShadow:'0 0 8px rgba(59,158,255,0.6)',
+            }} />
+          </div>
         </div>
       </main>
     );

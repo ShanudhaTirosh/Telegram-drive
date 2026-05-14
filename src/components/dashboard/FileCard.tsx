@@ -138,7 +138,12 @@ export function FileCard({ file, onDelete, onDownload, onPreview, isSelected, on
                 {/* File info overlay at bottom */}
                 <div className={`absolute bottom-0 left-0 right-0 p-3 ${thumbnail ? 'text-white' : 'text-telegram-text'}`}>
                     <h3 className="text-sm font-medium truncate w-full" title={file.name}>{file.name}</h3>
-                    <p className={`text-xs mt-0.5 ${thumbnail ? 'text-white/70' : 'text-telegram-subtext'}`}>{file.sizeStr}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                        <p className={`text-xs ${thumbnail ? 'text-white/70' : 'text-telegram-subtext'}`}>{file.sizeStr}</p>
+                        {file.isChunked && (
+                            <span className="chunk-badge">SPLIT</span>
+                        )}
+                    </div>
                 </div>
 
                 {/* Quick actions on hover */}

@@ -1,248 +1,605 @@
 @import "tailwindcss";
 
-/* stylelint-disable at-rule-no-unknown */
-/* Dark Theme (Default) - Using Tailwind v4 @theme directive */
+/* ═══════════════════════════════════════════════════════════════════════════
+   TELEGRAM DRIVE — Modern Glassmorphism Design System
+   ShanuFx · Shanudha Tirosh
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Tailwind v4 Theme Tokens ─────────────────────────────────────────────── */
 @theme {
-  --color-telegram-bg: #0e1621;
-  --color-telegram-surface: #17212b;
-  --color-telegram-primary: #ffae00;
-  --color-telegram-secondary: #2481cc;
-  --color-telegram-text: #ffffff;
-  --color-telegram-subtext: #8e9fb3;
-  --color-telegram-border: rgba(255, 255, 255, 0.1);
-  --color-telegram-hover: rgba(255, 255, 255, 0.05);
+  /* Deep space dark palette */
+  --color-telegram-bg:       #080d14;
+  --color-telegram-surface:  #0d1520;
+  --color-telegram-panel:    #111c2b;
+  --color-telegram-card:     rgba(17, 28, 43, 0.8);
+
+  /* Accent colours — electric blue × cyan glow */
+  --color-telegram-primary:  #3b9eff;
+  --color-telegram-secondary:#00d4ff;
+  --color-telegram-accent:   #7c3aed;
+  --color-telegram-success:  #22c55e;
+  --color-telegram-warning:  #f59e0b;
+  --color-telegram-danger:   #ef4444;
+
+  /* Text */
+  --color-telegram-text:     #e8f0fe;
+  --color-telegram-subtext:  #6b85a3;
+  --color-telegram-muted:    #3d5068;
+
+  /* Borders & overlays */
+  --color-telegram-border:   rgba(59, 158, 255, 0.12);
+  --color-telegram-hover:    rgba(59, 158, 255, 0.06);
+  --color-telegram-active:   rgba(59, 158, 255, 0.14);
+  --color-telegram-glass:    rgba(13, 21, 32, 0.75);
 }
 
-/* Light Theme Overrides */
+/* Light theme */
 :root.light {
-  --color-telegram-bg: #f0f2f5;
-  --color-telegram-surface: #ffffff;
-  --color-telegram-primary: #e69500;
-  --color-telegram-secondary: #2481cc;
-  --color-telegram-text: #1a1a1a;
-  --color-telegram-subtext: #65676b;
-  --color-telegram-border: rgba(0, 0, 0, 0.1);
-  --color-telegram-hover: rgba(0, 0, 0, 0.03);
+  --color-telegram-bg:       #f0f4fb;
+  --color-telegram-surface:  #ffffff;
+  --color-telegram-panel:    #f8faff;
+  --color-telegram-card:     rgba(255, 255, 255, 0.9);
+  --color-telegram-primary:  #2563eb;
+  --color-telegram-secondary:#0891b2;
+  --color-telegram-text:     #0f172a;
+  --color-telegram-subtext:  #475569;
+  --color-telegram-muted:    #94a3b8;
+  --color-telegram-border:   rgba(37, 99, 235, 0.12);
+  --color-telegram-hover:    rgba(37, 99, 235, 0.06);
+  --color-telegram-active:   rgba(37, 99, 235, 0.12);
+  --color-telegram-glass:    rgba(255, 255, 255, 0.85);
 }
 
-body,
-#root {
+/* ─── Base Reset ────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body, #root {
   margin: 0;
   padding: 0;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background: var(--color-telegram-bg);
   color: var(--color-telegram-text);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Auth screen gradient background */
-.auth-gradient {
-  background: radial-gradient(120% 120% at 0% 0%, #3ca5ff 0%, #007aff 100%);
+/* ─── Custom Scrollbar ──────────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(59,158,255,0.2);
+  border-radius: 99px;
+  transition: background 0.2s;
 }
+::-webkit-scrollbar-thumb:hover { background: rgba(59,158,255,0.45); }
 
-:root.light .auth-gradient {
-  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
-}
-
-/* Glassmorphism Utilities - Dark */
+/* ─── Glass Utility Classes ─────────────────────────────────────────────────── */
 .glass {
-  background: rgba(23, 33, 43, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(13, 21, 32, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(59, 158, 255, 0.1);
 }
-
 :root.light .glass {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(37, 99, 235, 0.1);
 }
 
-/* Auth-specific glass - works on gradient backgrounds in both themes */
-.auth-glass {
-  background: rgba(23, 33, 43, 0.85);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.glass-strong {
+  background: rgba(8, 13, 20, 0.88);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid rgba(59, 158, 255, 0.15);
 }
-
-:root.light .auth-glass {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #1a1a1a;
-}
-
-/* Force dark text inside auth-glass in light mode */
-:root.light .auth-glass .text-white {
-  color: #1a1a1a;
-}
-
-:root.light .auth-glass .text-white\/60 {
-  color: rgba(26, 26, 26, 0.7);
-}
-
-:root.light .auth-glass .text-gray-400 {
-  color: #555;
-}
-
-:root.light .auth-glass .text-blue-200 {
-  color: #1e40af;
-}
-
-:root.light .auth-glass .placeholder-gray-600::placeholder {
-  color: #9ca3af;
-}
-
-:root.light .auth-glass input {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.15);
-  color: #1a1a1a;
-}
-
-/* Auth form icons - Direct overrides for maximum visibility */
-.auth-form-icon {
-  color: #ffffff !important;
-  /* Default (Dark Mode): Pure White */
-  opacity: 1 !important;
-  z-index: 20;
-}
-
-/* Light Mode Override */
-:root.light .auth-form-icon {
-  color: #000000 !important;
-  /* Light Mode: Pure Black */
-  opacity: 0.8 !important;
+:root.light .glass-strong {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(37, 99, 235, 0.14);
 }
 
 .glass-input {
-  background: rgba(14, 22, 33, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(8, 13, 20, 0.55);
+  border: 1px solid rgba(59, 158, 255, 0.18);
   backdrop-filter: blur(10px);
+  color: var(--color-telegram-text);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-
+.glass-input:focus {
+  outline: none;
+  border-color: rgba(59, 158, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(59, 158, 255, 0.1);
+}
 :root.light .glass-input {
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(37, 99, 235, 0.18);
 }
 
-/* Custom Scrollbar - Dark */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* ─── Auth Screen ───────────────────────────────────────────────────────────── */
+.auth-gradient {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% -10%, rgba(59,158,255,0.25) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 110%, rgba(124,58,237,0.2) 0%, transparent 60%),
+    linear-gradient(180deg, #080d14 0%, #0a1525 100%);
+}
+:root.light .auth-gradient {
+  background: linear-gradient(135deg, #1e40af 0%, #0891b2 100%);
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+.auth-glass {
+  background: rgba(10, 17, 27, 0.9);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(59,158,255,0.14);
+  box-shadow:
+    0 25px 60px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(59,158,255,0.06) inset,
+    0 1px 0 rgba(255,255,255,0.04) inset;
+}
+:root.light .auth-glass {
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(37,99,235,0.15);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.15);
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+/* Auth form icons */
+.auth-form-icon { color: #3b9eff !important; opacity: 1 !important; z-index: 20; }
+:root.light .auth-form-icon { color: #2563eb !important; }
+
+/* ─── Sidebar ───────────────────────────────────────────────────────────────── */
+.sidebar-container {
+  background: rgba(9, 14, 22, 0.92);
+  border-right: 1px solid rgba(59,158,255,0.1);
+  backdrop-filter: blur(20px);
+}
+:root.light .sidebar-container {
+  background: rgba(255,255,255,0.96);
+  border-right: 1px solid rgba(37,99,235,0.1);
+}
+
+.sidebar-logo-area {
+  background: linear-gradient(135deg, rgba(59,158,255,0.08) 0%, rgba(124,58,237,0.05) 100%);
+  border-bottom: 1px solid rgba(59,158,255,0.08);
+}
+
+.sidebar-item {
+  position: relative;
+  border-radius: 10px;
+  transition: all 0.18s ease;
+  cursor: pointer;
+  overflow: hidden;
+}
+.sidebar-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(90deg, rgba(59,158,255,0.08) 0%, transparent 100%);
+  transition: opacity 0.18s;
+}
+.sidebar-item:hover::before { opacity: 1; }
+.sidebar-item:hover {
+  background: rgba(59,158,255,0.07);
+  transform: translateX(2px);
+}
+.sidebar-item.active {
+  background: rgba(59,158,255,0.12);
+  border: 1px solid rgba(59,158,255,0.2);
+}
+.sidebar-item.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  bottom: 25%;
+  width: 3px;
+  background: linear-gradient(180deg, #3b9eff, #00d4ff);
+  border-radius: 0 2px 2px 0;
+}
+
+/* ─── Top Bar ───────────────────────────────────────────────────────────────── */
+.topbar-container {
+  background: rgba(9,14,22,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(59,158,255,0.08);
+  box-shadow: 0 1px 0 rgba(59,158,255,0.06);
+}
+:root.light .topbar-container {
+  background: rgba(255,255,255,0.9);
+  border-bottom: 1px solid rgba(37,99,235,0.1);
+}
+
+.topbar-search {
+  background: rgba(59,158,255,0.05);
+  border: 1px solid rgba(59,158,255,0.14);
+  border-radius: 12px;
+  padding: 0.45rem 0.875rem;
+  color: var(--color-telegram-text);
+  transition: all 0.2s;
+  width: 100%;
+}
+.topbar-search::placeholder { color: var(--color-telegram-muted); }
+.topbar-search:focus {
+  outline: none;
+  background: rgba(59,158,255,0.08);
+  border-color: rgba(59,158,255,0.4);
+  box-shadow: 0 0 0 3px rgba(59,158,255,0.08);
+}
+:root.light .topbar-search {
+  background: rgba(37,99,235,0.04);
+  border-color: rgba(37,99,235,0.14);
+  color: #0f172a;
+}
+
+.topbar-icon-btn {
+  padding: 0.5rem;
+  border-radius: 10px;
+  color: var(--color-telegram-subtext);
+  transition: all 0.18s;
+  position: relative;
+}
+.topbar-icon-btn:hover {
+  background: rgba(59,158,255,0.1);
+  color: var(--color-telegram-text);
+  transform: translateY(-1px);
+}
+
+/* ─── File Cards ────────────────────────────────────────────────────────────── */
+.file-card {
+  background: rgba(13,21,32,0.8);
+  border: 1px solid rgba(59,158,255,0.08);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.25,0.46,0.45,0.94);
+  cursor: pointer;
+  position: relative;
+}
+.file-card:hover {
+  background: rgba(17,28,43,0.95);
+  border-color: rgba(59,158,255,0.22);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(59,158,255,0.1);
+}
+.file-card.selected {
+  border-color: rgba(59,158,255,0.5);
+  background: rgba(59,158,255,0.08);
+  box-shadow: 0 0 0 2px rgba(59,158,255,0.2);
+}
+:root.light .file-card {
+  background: rgba(255,255,255,0.85);
+  border-color: rgba(37,99,235,0.1);
+}
+:root.light .file-card:hover {
+  background: #ffffff;
+  border-color: rgba(37,99,235,0.3);
+  box-shadow: 0 8px 24px rgba(37,99,235,0.12);
+}
+
+.file-action-btn {
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  color: white;
+  transition: all 0.15s;
+}
+.file-action-btn:hover {
+  background: var(--color-telegram-primary);
+  transform: scale(1.08);
+}
+
+/* Chunked file badge */
+.chunk-badge {
+  background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(59,158,255,0.2));
+  border: 1px solid rgba(124,58,237,0.3);
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #a78bfa;
+  padding: 1px 6px;
+  letter-spacing: 0.03em;
+}
+
+/* ─── Upload / Download Queue ───────────────────────────────────────────────── */
+.queue-panel {
+  background: rgba(8,13,20,0.95);
+  border: 1px solid rgba(59,158,255,0.14);
+  border-radius: 16px;
+  backdrop-filter: blur(24px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(59,158,255,0.06) inset;
+}
+
+.queue-progress-bar {
+  height: 4px;
   border-radius: 99px;
+  background: rgba(59,158,255,0.12);
+  overflow: hidden;
+}
+.queue-progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #3b9eff, #00d4ff);
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(59,158,255,0.6);
+}
+.queue-progress-fill.error { background: linear-gradient(90deg, #ef4444, #f97316); box-shadow: 0 0 8px rgba(239,68,68,0.4); }
+.queue-progress-fill.success { background: linear-gradient(90deg, #22c55e, #10b981); box-shadow: 0 0 8px rgba(34,197,94,0.4); }
+
+/* ─── Modals ────────────────────────────────────────────────────────────────── */
+.modal-overlay {
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+}
+.modal-container {
+  background: rgba(10,16,26,0.97);
+  border: 1px solid rgba(59,158,255,0.15);
+  border-radius: 20px;
+  box-shadow:
+    0 40px 80px rgba(0,0,0,0.6),
+    0 0 0 1px rgba(59,158,255,0.06) inset,
+    0 1px 0 rgba(255,255,255,0.05) inset;
+  backdrop-filter: blur(32px);
+}
+:root.light .modal-container {
+  background: rgba(255,255,255,0.98);
+  border-color: rgba(37,99,235,0.15);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(36, 129, 204, 0.6);
+/* ─── About Modal ───────────────────────────────────────────────────────────── */
+.about-header-gradient {
+  background: linear-gradient(
+    135deg,
+    rgba(59,158,255,0.18) 0%,
+    rgba(124,58,237,0.14) 50%,
+    rgba(0,212,255,0.1) 100%
+  );
+  border-bottom: 1px solid rgba(59,158,255,0.1);
+}
+.about-glow-orb {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(59,158,255,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.about-icon-ring {
+  background: linear-gradient(135deg, rgba(59,158,255,0.2), rgba(124,58,237,0.15));
+  border: 2px solid rgba(59,158,255,0.25);
+  box-shadow: 0 0 20px rgba(59,158,255,0.2);
+}
+.about-badge {
+  background: rgba(59,158,255,0.1);
+  border: 1px solid rgba(59,158,255,0.2);
+  color: #93c5fd;
+}
+.about-card {
+  background: rgba(59,158,255,0.04);
+  border: 1px solid rgba(59,158,255,0.1);
+}
+.about-avatar-ring {
+  background: linear-gradient(135deg, #3b9eff, #7c3aed);
+  box-shadow: 0 0 16px rgba(59,158,255,0.3);
+}
+.about-link-row {
+  border: 1px solid rgba(255,255,255,0.04);
+  transition: all 0.18s;
+}
+.about-link-row:hover {
+  border-color: rgba(59,158,255,0.15);
+  transform: translateX(3px);
+}
+.about-purpose-box {
+  background: linear-gradient(135deg, rgba(0,212,255,0.05), rgba(59,158,255,0.03));
+  border: 1px solid rgba(0,212,255,0.12);
 }
 
-/* Custom Scrollbar - Light */
-:root.light ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
+/* ─── Bandwidth Widget ──────────────────────────────────────────────────────── */
+.bandwidth-widget {
+  background: rgba(59,158,255,0.05);
+  border: 1px solid rgba(59,158,255,0.1);
+  border-radius: 12px;
 }
 
-:root.light ::-webkit-scrollbar-thumb:hover {
-  background: rgba(36, 129, 204, 0.5);
+/* ─── Buttons ───────────────────────────────────────────────────────────────── */
+.btn-primary {
+  background: linear-gradient(135deg, #3b9eff, #0ea5e9);
+  color: white;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.18s;
+  box-shadow: 0 4px 12px rgba(59,158,255,0.3);
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #5ab1ff, #38bdf8);
+  box-shadow: 0 6px 20px rgba(59,158,255,0.45);
+  transform: translateY(-1px);
+}
+.btn-primary:active { transform: translateY(0); }
+
+.btn-danger {
+  background: rgba(239,68,68,0.1);
+  color: #f87171;
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 10px;
+  font-weight: 500;
+  transition: all 0.18s;
+}
+.btn-danger:hover { background: rgba(239,68,68,0.2); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-telegram-subtext);
+  border-radius: 10px;
+  transition: all 0.18s;
+}
+.btn-ghost:hover { background: var(--color-telegram-hover); color: var(--color-telegram-text); }
+
+/* ─── Status Indicators ─────────────────────────────────────────────────────── */
+.status-dot-connected {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+  animation: pulse-green 2s infinite;
+}
+.status-dot-disconnected {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
+}
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 4px #22c55e; }
+  50% { box-shadow: 0 0 10px #22c55e, 0 0 20px rgba(34,197,94,0.3); }
 }
 
-/* Progress Animation */
+/* ─── Loading Skeleton ──────────────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg,
+    rgba(59,158,255,0.04) 25%,
+    rgba(59,158,255,0.09) 50%,
+    rgba(59,158,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-wave 1.6s ease-in-out infinite;
+  border-radius: 8px;
+}
+@keyframes skeleton-wave {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Progress Animations ───────────────────────────────────────────────────── */
 @keyframes progress-indeterminate {
-  0% {
-    transform: translateX(-100%);
-  }
-
-  50% {
-    transform: translateX(50%);
-  }
-
-  100% {
-    transform: translateX(200%);
-  }
+  0%   { transform: translateX(-100%); }
+  50%  { transform: translateX(50%); }
+  100% { transform: translateX(200%); }
 }
-
 .animate-progress-indeterminate {
   animation: progress-indeterminate 1.5s infinite linear;
+  background: linear-gradient(90deg, transparent, rgba(59,158,255,0.8), transparent);
 }
 
-/* Light mode specific overrides for common patterns */
-:root.light .bg-telegram-bg {
-  background-color: var(--color-telegram-bg);
+/* ─── Drag & Drop Overlay ───────────────────────────────────────────────────── */
+.drag-overlay {
+  background: rgba(8,13,20,0.9);
+  border: 2px dashed rgba(59,158,255,0.4);
+  backdrop-filter: blur(16px);
 }
 
-:root.light .bg-telegram-surface {
-  background-color: var(--color-telegram-surface);
+/* ─── Empty State ───────────────────────────────────────────────────────────── */
+.empty-state-icon {
+  background: rgba(59,158,255,0.06);
+  border: 2px dashed rgba(59,158,255,0.15);
+  border-radius: 24px;
 }
 
-:root.light .border-white\/5,
-:root.light .border-white\/10 {
-  border-color: var(--color-telegram-border);
+/* ─── Context Menu ──────────────────────────────────────────────────────────── */
+.context-menu {
+  background: rgba(10,16,26,0.97);
+  border: 1px solid rgba(59,158,255,0.15);
+  border-radius: 14px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  backdrop-filter: blur(24px);
+}
+.context-menu-item {
+  border-radius: 8px;
+  transition: all 0.15s;
+  color: var(--color-telegram-subtext);
+}
+.context-menu-item:hover {
+  background: rgba(59,158,255,0.1);
+  color: var(--color-telegram-text);
+}
+.context-menu-item.danger:hover {
+  background: rgba(239,68,68,0.1);
+  color: #f87171;
 }
 
-:root.light .bg-white\/5,
-:root.light .hover\:bg-white\/5:hover {
-  background-color: var(--color-telegram-hover);
-}
-
-:root.light .bg-white\/10,
-:root.light .hover\:bg-white\/10:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-:root.light .bg-black\/20,
-:root.light .bg-black\/30,
-:root.light .bg-black\/50 {
-  background-color: rgba(0, 0, 0, 0.08);
-}
-
-/* File card action buttons - more visible in light mode */
-:root.light .file-action-btn {
-  background-color: rgba(0, 0, 0, 0.6) !important;
-  color: white !important;
-}
-
-:root.light .file-action-btn:hover {
-  background-color: var(--color-telegram-primary) !important;
-}
-
-/* Invert text colors for light mode where needed */
-:root.light .text-telegram-text {
+/* ─── Tooltip ───────────────────────────────────────────────────────────────── */
+.tooltip {
+  background: rgba(10,16,26,0.97);
+  border: 1px solid rgba(59,158,255,0.15);
+  border-radius: 8px;
+  font-size: 11px;
+  padding: 4px 10px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  pointer-events: none;
+  white-space: nowrap;
   color: var(--color-telegram-text);
 }
 
-:root.light .text-telegram-subtext {
+/* ─── Settings Modal ────────────────────────────────────────────────────────── */
+.settings-tab {
+  border-radius: 10px;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
   color: var(--color-telegram-subtext);
+  transition: all 0.18s;
+  cursor: pointer;
+}
+.settings-tab:hover { color: var(--color-telegram-text); background: var(--color-telegram-hover); }
+.settings-tab.active {
+  color: #3b9eff;
+  background: rgba(59,158,255,0.1);
+}
+.settings-section {
+  background: rgba(59,158,255,0.03);
+  border: 1px solid rgba(59,158,255,0.08);
+  border-radius: 14px;
+  padding: 1.25rem;
 }
 
-/* Card shadows for light mode */
-:root.light .shadow-2xl {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+/* ─── Glow Effects ──────────────────────────────────────────────────────────── */
+.glow-blue  { box-shadow: 0 0 20px rgba(59,158,255,0.25); }
+.glow-cyan  { box-shadow: 0 0 20px rgba(0,212,255,0.25); }
+.glow-purple{ box-shadow: 0 0 20px rgba(124,58,237,0.25); }
+
+/* ─── Animated Border ───────────────────────────────────────────────────────── */
+@keyframes border-spin {
+  to { --border-angle: 360deg; }
+}
+@property --border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+.animated-border {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--color-telegram-surface), var(--color-telegram-surface)) padding-box,
+    conic-gradient(from var(--border-angle), #3b9eff, #00d4ff, #7c3aed, #3b9eff) border-box;
+  animation: border-spin 4s linear infinite;
 }
 
-/* Input styling for light mode */
-:root.light input,
-:root.light textarea {
-  background-color: #ffffff;
-  border-color: rgba(0, 0, 0, 0.15);
-  color: #1a1a1a;
+/* ─── Light mode text / border overrides ────────────────────────────────────── */
+:root.light .bg-white\/5,
+:root.light .hover\:bg-white\/5:hover { background-color: var(--color-telegram-hover); }
+:root.light .bg-white\/10,
+:root.light .hover\:bg-white\/10:hover { background-color: rgba(0,0,0,0.04); }
+:root.light .border-white\/5,
+:root.light .border-white\/10 { border-color: var(--color-telegram-border); }
+:root.light .text-telegram-text    { color: var(--color-telegram-text); }
+:root.light .text-telegram-subtext { color: var(--color-telegram-subtext); }
+:root.light input, :root.light textarea {
+  background: #ffffff;
+  border-color: rgba(37,99,235,0.15);
+  color: #0f172a;
 }
+:root.light input::placeholder, :root.light textarea::placeholder { color: #94a3b8; }
+:root.light input:focus, :root.light textarea:focus { border-color: #2563eb; }
 
-:root.light input::placeholder,
-:root.light textarea::placeholder {
-  color: #9ca3af;
-}
-
-:root.light input:focus,
-:root.light textarea:focus {
-  border-color: var(--color-telegram-primary);
+/* Auth glass light mode inner text colours */
+:root.light .auth-glass .text-white    { color: #0f172a; }
+:root.light .auth-glass .text-white\/60{ color: rgba(15,23,42,0.65); }
+:root.light .auth-glass .text-gray-400 { color: #475569; }
+:root.light .auth-glass .text-blue-200 { color: #1e40af; }
+:root.light .auth-glass input {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.12);
+  color: #0f172a;
 }

@@ -20,6 +20,7 @@ import { DragDropOverlay } from './dashboard/DragDropOverlay';
 import { ExternalDropBlocker } from './dashboard/ExternalDropBlocker';
 import { PdfViewer } from './dashboard/PdfViewer';
 import { SettingsModal } from './dashboard/SettingsModal';
+import { AboutModal } from './dashboard/AboutModal';
 
 // Hooks
 import { useTelegramConnection } from '../hooks/useTelegramConnection';
@@ -28,6 +29,7 @@ import { useFileUpload } from '../hooks/useFileUpload';
 import { useFileDownload } from '../hooks/useFileDownload';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { useSettings } from '../context/SettingsContext';
+import { isChunkFile, isManifestFile, manifestToDisplayName } from '../hooks/useChunkedTransfer';
 
 export function Dashboard({ onLogout }: { onLogout: () => void }) {
     const queryClient = useQueryClient();
@@ -47,6 +49,7 @@ export function Dashboard({ onLogout }: { onLogout: () => void }) {
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [showMoveModal, setShowMoveModal] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
+    const [showAbout, setShowAbout] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState<TelegramFile[]>([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -64,11 +67,19 @@ export function Dashboard({ onLogout }: { onLogout: () => void }) {
 
     const { data: allFiles = [], isLoading, error } = useQuery({
         queryKey: ['files', activeFolderId],
-        queryFn: () => invoke<any[]>('cmd_get_files', { folderId: activeFolderId }).then(res => res.map(f => ({
-            ...f,
-            sizeStr: formatBytes(f.size),
-            type: f.icon_type || (f.name.endsWith('/') ? 'folder' : 'file')
-        }))),
+        queryFn: () => invoke<any[]>('cmd_get_files', { folderId: activeFolderId }).then(res => res
+            .map(f => ({
+                ...f,
+                sizeStr: formatBytes(f.size),
+                type: f.icon_type || (f.name.endsWith('/') ? 'folder' : 'file'),
+            }))
+            // Hide raw chunk files — only show manifests (displayed as the assembled file)
+            .filter(f => !isChunkFile(f.name))
+            // Transform manifest filenames to their original display name
+            .map(f => isManifestFile(f.name)
+                ? { ...f, name: manifestToDisplayName(f.name), isChunked: true }
+                : f
+            )),
         enabled: !!store,
     });
 
@@ -392,6 +403,7 @@ export function Dashboard({ onLogout }: { onLogout: () => void }) {
                 isConnected={isConnected}
                 onSync={handleSyncFolders}
                 onLogout={handleLogout}
+                onAbout={() => setShowAbout(true)}
                 bandwidth={bandwidth || null}
             />
 
@@ -470,6 +482,10 @@ export function Dashboard({ onLogout }: { onLogout: () => void }) {
             <SettingsModal
                 isOpen={showSettings}
                 onClose={() => setShowSettings(false)}
+            />
+            <AboutModal
+                isOpen={showAbout}
+                onClose={() => setShowAbout(false)}
             />
         </div>
     );
